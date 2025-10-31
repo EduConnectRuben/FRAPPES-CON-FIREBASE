@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. ESTADO GLOBAL DE LA APLICACIÓN
     // ===================================================================
     
-    // El stock inicial se mantiene como una plantilla
     const initialMenuItems = [
         {"id":1,"name":"Frappé de Fresa","category":"frappes","price":8.00,"description":"Dulce y refrescante, hecho con fresas naturales.","image":"images/frappe_fresa.png","stock":15},
         {"id":2,"name":"Frappé de Naranja","category":"frappes","price":8.00,"description":"Un toque cítrico y helado para recargar energías.","image":"images/frappe_naranja.png","stock":15},
@@ -19,87 +18,44 @@ document.addEventListener('DOMContentLoaded', () => {
     let cart = [];
     let pdfGenerator = null;
 
-    // ======================= ¡INICIO DE CAMBIOS! =======================
-
     function initApp() {
-        // La app ahora se inicia escuchando los datos de Firebase
         listenForStockUpdates();
-        
-        // El carrito sigue siendo local para cada usuario, no necesita estar en la nube
         loadCartFromStorage();
-        
         setupAllPages();
     }
     
-    // NUEVA FUNCIÓN: Se conecta y escucha los cambios de stock en Firebase
     function listenForStockUpdates() {
-        // 'products' es el nombre que le daremos a nuestra colección en la Realtime Database
         const productsRef = database.ref('products');
-
-        // .on('value', ...) se ejecuta una vez al cargar y luego CADA VEZ que los datos cambian en la nube
         productsRef.on('value', (snapshot) => {
             const productsData = snapshot.val();
-            
             if (productsData) {
-                // Si hay datos en Firebase, los usamos
                 menuItems = Object.values(productsData);
             } else {
-                // Si la base de datos está vacía, la llenamos con el stock inicial
                 console.log("Base de datos vacía. Subiendo stock inicial...");
                 menuItems = initialMenuItems;
-                // 'set' reemplaza todos los datos en la referencia 'products'
                 productsRef.set(initialMenuItems); 
             }
-            
-            // Una vez que tenemos los datos más recientes, redibujamos el menú
             renderMenu();
-
         }, (error) => {
             console.error("Error al leer datos de Firebase: ", error);
             showNotification("No se pudo conectar al servidor de inventario.", "error");
         });
     }
 
-    // FUNCIÓN MODIFICADA: Actualiza el stock en Firebase después de la compra
-    const updateStockAfterPurchase = () => {
-        // 'updates' es un objeto que contendrá todas las rutas a actualizar
+    // FUNCIÓN MODIFICADA: Ahora acepta el carrito como argumento para mayor seguridad.
+    const updateStockAfterPurchase = (finalizedCart) => {
         const updates = {};
-
-        cart.forEach(cartItem => {
+        finalizedCart.forEach(cartItem => {
             const productInDb = menuItems.find(item => item.id === cartItem.id);
             if (productInDb) {
                 const newStock = productInDb.stock - cartItem.quantity;
-                
-                // La estructura de la base de datos usará un índice basado en el ID.
-                // Firebase usa arrays base 0, así que si tu ID es 1, el índice es 0.
                 const productIndex = productInDb.id - 1;
-                
-                // Preparamos la actualización para este producto específico.
-                // La ruta es 'products/ÍNDICE_DEL_PRODUCTO/stock'
                 updates[`products/${productIndex}/stock`] = newStock < 0 ? 0 : newStock;
             }
         });
 
-        // database.ref().update() envía todas las actualizaciones a Firebase en una sola operación
-        database.ref().update(updates)
-            .then(() => {
-                console.log("¡Stock actualizado en Firebase!");
-                // Limpiamos el carrito local SOLO si la actualización en la nube fue exitosa
-                cart = []; 
-                saveCartToStorage(); 
-                renderCartPage(); 
-                // renderMenu() se llamará automáticamente gracias al listener 'listenForStockUpdates'
-            })
-            .catch((error) => {
-                console.error("Error al actualizar el stock en Firebase:", error);
-                // Si falla, informamos al usuario y NO limpiamos el carrito
-                showNotification("Hubo un error al procesar tu pedido. Inténtalo de nuevo.", "error");
-            });
+        return database.ref().update(updates);
     };
-
-    // La función loadStockData() ya no es necesaria y se puede borrar.
-
-    // ======================= ¡FIN DE CAMBIOS! =======================
 
     function setupAllPages() {
         setupNavigationAndLogin();
@@ -110,13 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setupReservationPage();
     }
 
-    // El manejo del carrito sigue siendo local (localStorage)
     const loadCartFromStorage = () => cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
     const saveCartToStorage = () => { localStorage.setItem('shoppingCart', JSON.stringify(cart)); updateCartCounter(); };
 
     const addToCart = (itemId) => {
         const itemInMenu = menuItems.find(i => i.id === itemId);
-        // La validación de stock ahora es contra los datos en tiempo real de Firebase
         if (!itemInMenu || itemInMenu.stock <= 0) {
             return showNotification(`Lo sentimos, ${itemInMenu.name} está agotado.`, 'error');
         }
@@ -136,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         showNotification(`${itemInMenu.name} añadido al carrito!`);
         saveCartToStorage();
-        renderMenu(); // Redibuja el menú para reflejar el stock disponible menos lo que está en el carrito
+        renderMenu();
     };
 
     const updateCartQuantity = (itemId, newQuantity) => {
@@ -165,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (counter) counter.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
     };
 
-    // renderMenu ahora siempre usará 'menuItems' actualizado desde Firebase
     function renderMenu() {
         const menuGrid = document.getElementById('menu-grid');
         if (!menuGrid) return;
@@ -178,15 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchTerm) itemsToRender = itemsToRender.filter(item => item.name.toLowerCase().includes(searchTerm));
         
         menuGrid.innerHTML = '';
-        if (itemsToRender.length === 0) {
+        if (!itemsToRender || itemsToRender.length === 0) {
             menuGrid.innerHTML = '<p style="text-align: center;">No se encontraron productos.</p>';
             return;
         }
         
         itemsToRender.forEach(item => {
             const quantityInCart = cart.find(ci => ci.id === item.id)?.quantity || 0;
-            const currentStock = item.stock; // El stock real de la base de datos
-            const availableStock = currentStock - quantityInCart; // Lo que realmente puede añadir
+            const currentStock = item.stock;
+            const availableStock = currentStock - quantityInCart;
             
             let stockStatus, stockText;
             if (currentStock > 10) { stockStatus = 'available'; stockText = 'Disponible'; } 
@@ -200,10 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
             menuGrid.appendChild(card);
         });
     }
-    
-    // El resto de las funciones (renderCartPage, setupMenuPage, setupCartPage, etc.) no necesitan grandes cambios.
-    // ... [PEGAR AQUÍ EL RESTO DE TUS FUNCIONES DESDE renderCartPage HASTA EL FINAL] ...
-    // ... [ES EXACTAMENTE IGUAL QUE TU CÓDIGO ORIGINAL] ...
     
     function renderCartPage() {
         const cartItemsList = document.getElementById('cart-items-list');
@@ -245,14 +194,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupMenuPage() {
         const menuPageContent = document.getElementById('menu-grid');
         if (!menuPageContent) return;
-        renderMenu(); // Se renderizará con los datos iniciales de Firebase
-        document.getElementById('search-input').addEventListener('input', renderMenu);
-        document.getElementById('category-filter').addEventListener('change', renderMenu);
+        renderMenu();
+        const searchInput = document.getElementById('search-input');
+        const categoryFilter = document.getElementById('category-filter');
+        if (searchInput) searchInput.addEventListener('input', renderMenu);
+        if (categoryFilter) categoryFilter.addEventListener('change', renderMenu);
         menuPageContent.addEventListener('click', e => {
             if (e.target.classList.contains('add-to-cart-btn')) addToCart(Number(e.target.dataset.id));
         });
     }
 
+    // ======================= FUNCIÓN CLAVE ACTUALIZADA =======================
     function setupCartPage() {
         const cartContainer = document.getElementById('cart-container');
         if (!cartContainer) return;
@@ -273,14 +225,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        document.getElementById('checkout-btn').addEventListener('click', () => {
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (!checkoutBtn) return;
+
+        checkoutBtn.addEventListener('click', () => {
             if (cart.length === 0) return;
-            // Primero, se actualiza el stock en Firebase (la función ya está modificada)
-            // Luego, el resto del proceso sigue igual.
+
+            // 1. Guardar una copia del carrito actual para procesarlo de forma segura.
+            const finalizedCart = [...cart];
+
+            // 2. Actualizar el stock en Firebase.
+            updateStockAfterPurchase(finalizedCart)
+                .then(() => {
+                    console.log("¡Stock actualizado en Firebase con éxito!");
+                })
+                .catch((error) => {
+                    console.error("Error al actualizar el stock en Firebase:", error);
+                    showNotification("Hubo un error al procesar tu pedido. Inténtalo de nuevo.", "error");
+                    return; // Detener el proceso si la actualización del stock falla.
+                });
+
+            // 3. Abrir WhatsApp con los detalles del pedido.
             const yourWhatsappNumber = '59174420831'; 
             let orderMessage = `¡Hola Frappés Valentina! 👋 Quisiera hacer el siguiente pedido:\n\n`;
             let total = 0;
-            cart.forEach(item => {
+            finalizedCart.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 orderMessage += `*${item.quantity}x* - ${item.name}\n`;
                 total += itemTotal;
@@ -289,11 +258,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const encodedMessage = encodeURIComponent(orderMessage);
             const whatsappUrl = `https://wa.me/${yourWhatsappNumber}?text=${encodedMessage}`;
             window.open(whatsappUrl, '_blank');
-            showSuccessModal('¡Pedido listo para enviar!', 'Se abrirá WhatsApp para que completes tu pedido. También puedes descargar tu comprobante.', generateOrderPDF);
+            
+            // 4. Mostrar el modal de éxito. Le pasamos la CCOPIA del carrito a la función del PDF.
+            showSuccessModal(
+                '¡Pedido listo para enviar!', 
+                'Se abrirá WhatsApp para que completes tu pedido. También puedes descargar tu comprobante.', 
+                () => generateOrderPDF(finalizedCart) // La función para el PDF usará la copia guardada.
+            );
+
+            // 5. Vaciar el carrito principal de la UI inmediatamente.
+            cart = []; 
+            saveCartToStorage(); 
+            renderCartPage();
         });
 
         renderCartPage();
     }
+    // =======================================================================
 
     function setupReservationPage() {
         const reservationForm = document.getElementById('reservation-form');
@@ -314,48 +295,52 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupNavigationAndLogin() {
         const navToggle = document.querySelector('.mobile-nav-toggle');
         const primaryNav = document.getElementById('primary-navigation');
-        navToggle?.addEventListener('click', () => {
-            const isVisible = primaryNav.getAttribute('data-visible') === 'true';
-            primaryNav.setAttribute('data-visible', !isVisible);
-            navToggle.setAttribute('aria-expanded', !isVisible);
-        });
+        if (navToggle && primaryNav) {
+            navToggle.addEventListener('click', () => {
+                const isVisible = primaryNav.getAttribute('data-visible') === 'true';
+                primaryNav.setAttribute('data-visible', !isVisible);
+                navToggle.setAttribute('aria-expanded', !isVisible);
+            });
+        }
     }
 
     function setupSuccessModal() {
         const successModal = document.getElementById('success-modal');
         const closeBtn = document.getElementById('close-success-modal-btn');
         const generatePdfBtn = document.getElementById('generate-pdf-btn');
-        closeBtn?.addEventListener('click', () => successModal.classList.remove('show'));
-        generatePdfBtn?.addEventListener('click', () => {
-            if (typeof pdfGenerator === 'function') pdfGenerator();
-            successModal.classList.remove('show');
-        });
+        if (successModal && closeBtn && generatePdfBtn) {
+            closeBtn.addEventListener('click', () => successModal.classList.remove('show'));
+            generatePdfBtn.addEventListener('click', () => {
+                if (typeof pdfGenerator === 'function') pdfGenerator();
+                successModal.classList.remove('show');
+            });
+        }
     }
 
     function showSuccessModal(title, message, pdfGenFunc) {
-        document.getElementById('success-modal-title').textContent = title;
-        document.getElementById('success-modal-message').textContent = message;
-        pdfGenerator = pdfGenFunc;
-        document.getElementById('success-modal').classList.add('show');
+        const modalTitle = document.getElementById('success-modal-title');
+        const modalMessage = document.getElementById('success-modal-message');
+        const successModal = document.getElementById('success-modal');
+        if (modalTitle && modalMessage && successModal) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            pdfGenerator = pdfGenFunc;
+            successModal.classList.add('show');
+        }
     }
 
-    function generateOrderPDF() {
+    // FUNCIÓN MODIFICADA: Acepta un carrito como argumento para generar el PDF.
+    function generateOrderPDF(finalizedCart) {
         if (typeof window.jspdf === 'undefined') return showNotification("Error: Librería PDF no cargada.", "error");
-        if (cart.length === 0) return showNotification("El carrito está vacío.", "error");
-        
-        // ¡IMPORTANTE! Esta función ahora se ejecuta DESPUÉS de enviar el pedido.
-        // El stock en Firebase ya debería haber sido actualizado por updateStockAfterPurchase()
-        updateStockAfterPurchase();
+        if (!finalizedCart || finalizedCart.length === 0) return showNotification("No hay nada que imprimir.", "error");
         
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        doc.setFontSize(22);
-        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22); doc.setFont('helvetica', 'bold');
         doc.text('Comprobante de Pedido - Frappés Valentina', 105, 20, { align: 'center' });
         
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12); doc.setFont('helvetica', 'normal');
         doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 35);
         doc.text(`Cliente: Invitado`, 20, 41);
         
@@ -363,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableRows = [];
         let total = 0;
         
-        cart.forEach(item => {
+        finalizedCart.forEach(item => {
             const itemTotal = item.price * item.quantity;
             tableRows.push([item.name, item.quantity, `Bs ${item.price.toFixed(2)}`, `Bs ${itemTotal.toFixed(2)}`]);
             total += itemTotal;
@@ -371,8 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         doc.autoTable({ head: [tableColumn], body: tableRows, startY: 50 });
         
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
         doc.text(`Total a Pagar: Bs ${total.toFixed(2)}`, 190, doc.lastAutoTable.finalY + 15, { align: 'right' });
 
         const pdfDataUri = doc.output('datauristring');

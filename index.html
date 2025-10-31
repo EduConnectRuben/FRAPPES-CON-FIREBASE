@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/logo.png" type="image/x-icon">
+    <link rel="apple-touch-icon" href="images/logo.png">
+    <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
+    <title>Frappés Valentina - Inicio</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Link para instalar a pantalla -->
+    <link rel="manifest" href="/instalar/manifest.json">
+</head>
+<body>
+
+    <header class="encabezado">
+        <a href="index.html" class="logo-link"><h1 id="titulo">Frappés Valentina</h1></a>
+        <button class="mobile-nav-toggle" aria-controls="primary-navigation" aria-expanded="false">
+            <span class="sr-only"></span>
+        </button>
+        <nav>
+            <ul id="primary-navigation" class="navigation" data-visible="false">
+                <li><a class="nav-link active" href="index.html">Inicio</a></li>
+                <li><a class="nav-link" href="menu.html">Menú</a></li>
+                <li><a class="nav-link cart-icon-link" href="pedido.html" aria-label="Ver carrito"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75L7.2,14.64L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z"/></svg><span id="cart-counter">0</span></a></li>
+                <li><a class="nav-link" href="reservas.html">Reservas</a></li>
+                <li><a class="nav-link" href="admin.html">Admin</a></li>            
+           </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section class="hero">
+            <h2>El Sabor que Refresca tu Día</h2><br>
+            <p>Frappés, bebidas calientes y la mejor onda. <br> ¡todo en un solo lugar!</p><br>
+            <a href="menu.html" class="cta-button">Ver el Menú Completo</a>
+        </section>
+
+        <section id="promo" class="page-section">
+            <h2>¡Nuestra Promo Estrella!</h2>
+            <div class="promo-card">
+                <img src="images/combo.png" alt="Promoción 2x1 en Frappés" class="promo-img">
+                <div class="promo-body">
+                    <h3 class="promo-title">COMBO DOS POR UNO</h3>
+                    <p class="promo-text">¡Lleva dos de tus frappés favoritos por un precio increíble! Combina los sabores como quieras.</p>
+                    <p class="promo-price">Solo por Bs 15.00</p>
+                    <a href="menu.html" class="cta-button">¡Lo Quiero!</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="page-section">
+            <h2>Nuestros Sabores Únicos</h2>
+            <div class="card-container">
+                <div class="card"><img src="images/frappe_fresa.png" alt="Frappé de Fresa" class="card-img"><div class="card-body"><h3 class="card-title">Frappé de Fresa</h3></div></div>
+                <div class="card"><img src="images/frappe_naranja.png" alt="Frappé de Naranja" class="card-img"><div class="card-body"><h3 class="card-title">Frappé de Naranja</h3></div></div>
+                <div class="card"><img src="images/frappe_chocolate.png" alt="Frappé de Chocolate" class="card-img"><div class="card-body"><h3 class="card-title">Frappé de Chocolate</h3></div></div>
+                <div class="card"><img src="images/frappe_coco.png" alt="Frappé de Coco" class="card-img"><div class="card-body"><h3 class="card-title">Frappé de Coco</h3></div></div>
+                <div class="card"><img src="images/cafe.png" alt="Café Caliente" class="card-img"><div class="card-body"><h3 class="card-title">Café Caliente</h3></div></div>
+                <div class="card"><img src="images/te.png" alt="Té Caliente" class="card-img"><div class="card-body"><h3 class="card-title">Té Caliente</h3></div></div>
+            </div>
+        </section>
+
+        <section id="ubicacion" class="page-section">
+            <h2>Encuéntranos Aquí</h2>
+            <p>Estamos en la entrada del mercado municipal de Pailón. ¡Te esperamos!</p>
+            <div class="map-container"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3797.234367803527!2d-62.7199696!3d-17.6609032!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x93f20500535361c9:0xfe661d803e50965b!2sIntendencia%20Municipal%20de%20Pailon!5e0!3m2!1ses-419!2sbo!4v1699541577451!5m2!1ses-419!2sbo" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe></div>        
+        </section>
+    </main>
+
+    <footer class="pie-de-pagina">
+        <p><b>Horario:</b> Lunes a Domingo de 8:30 AM a 5:30 PM</p>
+        <p>&copy; 2025 Frappés Valentina. Todos los derechos reservados.</p>
+        <div class="social-links">
+            <a href="https://www.facebook.com/share/1ABpvo7NR8/" target="_blank">Facebook</a> |
+            <a href="https://www.instagram.com/valentinafrappe?igsh=MTUxb2ZrNHg0a2xpNA==" target="_blank">Instagram</a> |
+            <a href="https://www.tiktok.com/@frapps.valentina?_t=ZS-90qbxOZ6SxO&_r=1" target="_blank">TikTok</a>
+        </div>    
+    </footer>
+    
+    <!-- Modales y Notificaciones -->
+    <div id="login-modal" class="modal-backdrop"><div class="modal-content"><button id="close-login-modal-btn" class="modal-close">&times;</button><h3>Iniciar Sesión</h3><form id="login-form" class="form-container" style="box-shadow: none; padding: 0;"><div class="form-group"><label for="username">Usuario (ingresa con: cliente)</label><input type="text" id="username" required></div><div class="form-group"><label for="password">Contraseña (ingresa con: 1234)</label><input type="password" id="password" required></div><p id="login-error" style="color: red; display: none; text-align: center;">Usuario o contraseña incorrectos.</p><button type="submit" class="cta-button">Entrar</button></form></div></div>
+    <div id="success-modal" class="modal-backdrop"><div class="modal-content"><button id="close-success-modal-btn" class="modal-close">&times;</button><h3 id="success-modal-title">¡Éxito!</h3><p id="success-modal-message">Tu operación se completó.</p><button id="generate-pdf-btn" class="cta-button">Imprimir PDF</button></div></div>
+    <div id="notification" class="notification"></div>
+    
+    <!-- Botón de WhatsApp -->
+     <a href="https://wa.me/59174420831?text=¡Hola%20Frappés%20Valentina!%20Quisiera%20hacer%20un%20pedido." class="whatsapp-float" target="_blank" rel="noopener noreferrer"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.487 5.235 3.487 8.413.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg></a>
+    
+    <!-- ======================= INICIA BLOQUE DE FIREBASE ======================= -->
+    <!-- SDK de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-database-compat.js"></script>
+
+    <!-- Tu script de configuración de Firebase -->
+    <script>
+      // Tu configuración web de Firebase para esta aplicación
+      const firebaseConfig = {
+        apiKey: "AIzaSyBCflHhjtHJx-qyQCOLzkGFg_sMLvyVFok",
+        authDomain: "frappes-valentina-stock.firebaseapp.com",
+        databaseURL: "https://frappes-valentina-stock-default-rtdb.firebaseio.com",
+        projectId: "frappes-valentina-stock",
+        storageBucket: "frappes-valentina-stock.appspot.com",
+        messagingSenderId: "170646695517",
+        appId: "1:170646695517:web:ae7f0a0a4e79470e9e27b4",
+        measurementId: "G-R6H733N2LZ"
+      };
+
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      
+      // Crear una referencia a tu base de datos
+      const database = firebase.database();
+    </script>
+    <!-- ======================= FINALIZA BLOQUE DE FIREBASE ======================= -->
+
+    <script src="js/scripts.js"></script>
+
+    <!-- CÓDIGO DEL CHATBOT -->
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <df-messenger
+      intent="WELCOME"
+      chat-title="FrappésValentinaBot"
+      agent-id="7b2e9fb3-7398-4fbb-8a62-c932948dcb89"
+      language-code="es">
+    </df-messenger>
+    <!-- FIN DEL CÓDIGO DEL CHATBOT -->
+    
+    <!-- script para instalar a pantalla -->
+    <script src="/instalar/pwa.js"></script>
+</body>
+</html>

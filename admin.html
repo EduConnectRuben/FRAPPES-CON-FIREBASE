@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Stock Frappés Valentina</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos adicionales para la página de admin */
+        .admin-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        .admin-container h1 {
+            color: var(--color-acento);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        #stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+        #stock-table th, #stock-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        #stock-table th {
+            background-color: var(--color-fondo); /* Asegúrate de tener esta variable en tu CSS */
+            color: var(--color-acento);
+        }
+        .reset-button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            background-image: linear-gradient(135deg, #f44336, #d32f2f);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .reset-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+        .back-to-home-btn {
+            display: inline-block;
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            background-color: #f0f0f0;
+            color: var(--color-acento);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-bottom: 2rem;
+        }
+        .back-to-home-btn:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="admin-container">
+        <a href="index.html" class="back-to-home-btn">← Volver a la Tienda</a>
+
+        <!-- SECCIÓN DE LOGIN (sin cambios) -->
+        <div id="login-section">
+            <h1>Acceso de Administrador</h1>
+            <form id="admin-login-form" class="form-container" style="padding: 2rem; box-shadow: none; border: 1px solid #eee;">
+                <div class="form-group">
+                    <label for="admin-username">Usuario</label>
+                    <input type="text" id="admin-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Contraseña</label>
+                    <input type="password" id="admin-password" required>
+                </div>
+                <p id="admin-login-error" style="color: red; display: none; text-align: center; margin-bottom: 1rem;">Usuario o contraseña incorrectos.</p>
+                <button type="submit" class="cta-button">Entrar</button>
+            </form>
+        </div>
+
+        <!-- SECCIÓN DE CONTENIDO (ahora conectada a Firebase) -->
+        <div id="content-section" style="display: none;">
+            <h1>Panel de Control de Stock</h1>
+            <h2>Inventario Actual (en tiempo real)</h2>
+            <table id="stock-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Stock Actual</th>
+                    </tr>
+                </thead>
+                <tbody id="stock-body">
+                    <!-- Los datos se cargarán aquí desde Firebase -->
+                </tbody>
+            </table>
+
+            <h2>Acciones</h2>
+            <button id="reset-stock-btn" class="reset-button">Restaurar Stock Inicial en la Nube</button>
+            <p style="text-align: center; margin-top: 1rem; color: #666;">
+                <strong>¡Cuidado!</strong> Esta acción restaurará el inventario para TODOS los usuarios.
+            </p>
+        </div>
+    </main>
+
+    <!-- ======================= ¡INICIO DE CAMBIOS! ======================= -->
+    <!-- SDK de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-database-compat.js"></script>
+
+    <!-- Tu script de configuración de Firebase -->
+    <script>
+      // ATENCIÓN: Reemplaza esto con la configuración que copiaste de tu proyecto de Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyBCflHhjtHJx-qyQCOLzkGFg_sMLvyVFok", // TU_API_KEY
+        authDomain: "frappes-valentina-stock.firebaseapp.com", // TU_PROYECTO.firebaseapp.com
+        databaseURL: "https://frappes-valentina-stock-default-rtdb.firebaseio.com", // https://TU_PROYECTO.firebasedatabase.app
+        projectId: "frappes-valentina-stock", // TU_PROJECT_ID
+        storageBucket: "frappes-valentina-stock.appspot.com", // TU_PROYECTO.appspot.com
+        messagingSenderId: "170646695517", // TU_SENDER_ID
+        appId: "1:170646695517:web:ae7f0a0a4e79470e9e27b4" // TU_APP_ID
+      };
+
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      
+      // Crear una referencia a tu base de datos
+      const database = firebase.database();
+    </script>
+    <!-- ======================= ¡FIN DE CAMBIOS! ======================= -->
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURACIÓN DE LOGIN (sin cambios) ---
+            const CORRECT_USERNAME = 'Valentina'; 
+            const CORRECT_PASSWORD = '74420831';
+
+            const loginSection = document.getElementById('login-section');
+            const contentSection = document.getElementById('content-section');
+            const loginForm = document.getElementById('admin-login-form');
+            const usernameInput = document.getElementById('admin-username');
+            const passwordInput = document.getElementById('admin-password');
+            const loginError = document.getElementById('admin-login-error');
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                if (username === CORRECT_USERNAME && password === CORRECT_PASSWORD) {
+                    loginSection.style.display = 'none';
+                    contentSection.style.display = 'block';
+                    loadStockManagement(); 
+                } else {
+                    loginError.style.display = 'block';
+                }
+            });
+
+            // ======================= ¡INICIO DE CAMBIOS EN LÓGICA! =======================
+            function loadStockManagement() {
+                const stockBody = document.getElementById('stock-body');
+                const resetButton = document.getElementById('reset-stock-btn');
+                const productsRef = database.ref('products'); // Referencia a la base de datos de Firebase
+
+                // Se necesita la lista inicial aquí para la función de restaurar
+                const initialMenuItems = [
+                    {"id":1,"name":"Frappé de Fresa","category":"frappes","price":8.00,"description":"Dulce y refrescante...","image":"images/frappe_fresa.png","stock":15},
+                    {"id":2,"name":"Frappé de Naranja","category":"frappes","price":8.00,"description":"Un toque cítrico...","image":"images/frappe_naranja.png","stock":15},
+                    {"id":3,"name":"Frappé de Chocolate","category":"frappes","price":8.00,"description":"Cremoso e intenso...","image":"images/frappe_chocolate.png","stock":15},
+                    {"id":4,"name":"Frappé de Coco","category":"frappes","price":8.00,"description":"Sabor tropical...","image":"images/frappe_coco.png","stock":15},
+                    {"id":5,"name":"Combo 2x1 Frappés","category":"combos","price":15.00,"description":"¡Lleva dos frappés!...","image":"images/combo.png","stock":15},
+                    {"id":6,"name":"Café Caliente","category":"calientes","price":5.00,"description":"El clásico café...","image":"images/cafe.png","stock":15},
+                    {"id":7,"name":"Té Caliente","category":"calientes","price":3.00,"description":"Una infusión caliente...","image":"images/te.png","stock":15}
+                ];
+
+                // FUNCIÓN MODIFICADA: Lee de Firebase en tiempo real
+                function displayStock() {
+                    stockBody.innerHTML = '<tr><td colspan="2">Cargando inventario...</td></tr>';
+                    
+                    productsRef.on('value', (snapshot) => {
+                        stockBody.innerHTML = ''; // Limpia la tabla para redibujar
+                        const stockItems = snapshot.val();
+                        if (stockItems && stockItems.length > 0) {
+                            stockItems.forEach(item => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `<td>${item.name}</td><td>${item.stock}</td>`;
+                                stockBody.appendChild(row);
+                            });
+                        } else {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td colspan="2">No hay datos de stock en la base de datos.</td>`;
+                            stockBody.appendChild(row);
+                        }
+                    }, (error) => {
+                        console.error(error);
+                        stockBody.innerHTML = '<tr><td colspan="2">Error al cargar el inventario.</td></tr>';
+                    });
+                }
+
+                // EVENTO MODIFICADO: Restaura el stock en Firebase
+                resetButton.addEventListener('click', () => {
+                    if (confirm('¿Estás seguro? Esto reemplazará el stock actual en la base de datos con los valores iniciales.')) {
+                        // 'set' sobrescribe todos los datos en la referencia 'products'
+                        productsRef.set(initialMenuItems)
+                            .then(() => {
+                                alert('¡Stock restaurado con éxito en la base de datos central!');
+                                // La tabla se actualizará automáticamente gracias al listener .on('value')
+                            })
+                            .catch((error) => {
+                                alert('Hubo un error al restaurar el stock: ' + error.message);
+                            });
+                    }
+                });
+
+                displayStock(); // Llama a la función para empezar a escuchar
+            }
+            // ======================= ¡FIN DE CAMBIOS EN LÓGICA! =======================
+        });
+    </script>
+</body>
+</html>

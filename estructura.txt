@@ -1,0 +1,21 @@
+/tu-proyecto
+|-- index.html
+|-- menu.html
+|-- pedido.html
+|-- reservas.html
+|
+|-- /css
+|   |-- styles.css
+|
+|-- /js
+|   |-- scripts.js
+|
+|-- /images
+|   |-- logo.png
+|   |-- frappe_fresa.png
+|   |-- frappe_naranja.png
+|   |-- frappe_chocolate.png
+|   |-- frappe_coco.png
+|   |-- combo.png
+|   |-- cafe.png
+|   |-- favicon.png  (Tu logo en formato pequeño)
